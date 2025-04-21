@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block content %}
+    <h1>{{ opts.verbose_name_plural|capfirst }} historial</h1>
+    <div id="content-main">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{% trans "Field" %}</th>
+                    <th>{% trans "Old Value" %}</th>
+                    <th>{% trans "New Value" %}</th>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "User" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for change in changes %}
+                <tr>
+                    <td>{{ change.field }}</td>
+                    <td>{{ change.old }}</td>
+                    <td>{{ change.new }}</td>
+                    <td>{{ change.history_date }}</td>
+                    <td>{{ change.history_user }}</td>
+                    <td>{{ change.history_type }}</td>
+                    <td>
+                        <a class="button" href="{{ change.revert_url }}">{% trans "Revert" %}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

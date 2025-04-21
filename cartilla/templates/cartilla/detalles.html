@@ -1,0 +1,84 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Detalles de Cartilla{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Detalles de Cartilla</h1>
+    <table class="table table-striped table-hover mt-4">
+        <tr>
+            <th>Nombre</th>
+            <td>{{ object.nombre }}</td>
+        </tr>
+        <tr>
+            <th>Procedencia Convenio</th>
+            <td>{{ object.procedencia_convenio }}</td>
+        </tr>
+        <tr>
+            <th>Tipo de Cartilla</th>
+            <td>{{ object.tipo_cartilla }}</td>
+        </tr>
+        <tr>
+            <th>Matrícula</th>
+            <td>{{ object.matricula }}</td>
+        </tr>
+        <tr>
+            <th>Especialidad</th>
+            <td>{{ object.especialidad }}</td>
+        </tr>
+        <tr>
+            <th>Domicilio</th>
+            <td>{{ object.domicilio }}</td>
+        </tr>
+        <tr>
+            <th>Teléfono</th>
+            <td>{{ object.telefono }}</td>
+        </tr>
+        <tr>
+            <th>Barrio/Localidad</th>
+            <td>{{ object.barrio_localidad }}</td>
+        </tr>
+        <tr>
+            <th>Provincia</th>
+            <td>{{ object.provincia }}</td>
+        </tr>
+        <tr>
+            <th>Centro de Atención</th>
+            <td>{{ object.centro_de_atencion }}</td>
+        </tr>
+        <tr>
+            <th>CUIT</th>
+            <td>{{ object.cuit }}</td>
+        </tr>
+        <tr>
+            <th>Habilitado</th>
+            <td>{{ object.habilitado }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ object.email }}</td>
+        </tr>
+        <tr>
+            <th>Solo Derivación</th>
+            <td>{{ object.solo_derivacion }}</td>
+        </tr>
+        <tr>
+            <th>Fecha de Alta</th>
+            <td>{{ object.fecha_alta }}</td>
+        </tr>
+        <tr>
+            <th>Usuario de Alta</th>
+            <td>{{ object.usuario_alta }}</td>
+        </tr>
+        <tr>
+            <th>Fecha de Baja</th>
+            <td>{{ object.fecha_baja }}</td>
+        </tr>
+        <tr>
+            <th>Especialidades Originales</th>
+            <td>{{ object.especialidades_originales }}</td>
+        </tr>
+    </table>
+    <!-- <a href="{% url 'leer' %}" class="btn btn-primary">Volver al listado</a> -->
+</div>
+{% endblock %}

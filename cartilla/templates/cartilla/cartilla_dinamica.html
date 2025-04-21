@@ -1,0 +1,192 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Cartilla Dinámica{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Cartilla Dinámica</h1>
+    <form id="form_busqueda" method="get">
+        <div class="form-group">
+            <label for="search-input">Buscar por Nombre de Centro</label>
+            <input type="text" id="search-input" class="form-control" placeholder="Buscar...">
+        </div>
+        <div class="form-group">
+            <label for="provincia-input">Buscar por Provincia</label>
+            <input type="text" id="provincia-input" class="form-control" placeholder="Buscar...">
+        </div>
+        <div class="form-group">
+            <label for="localidad-input">Buscar por Localidad</label>
+            <input type="text" id="localidad-input" class="form-control" placeholder="Buscar...">
+        </div>
+        <div class="form-group">
+            <label for="especialidad-input">Buscar por Especialidad</label>
+            <input type="text" id="especialidad-input" class="form-control" placeholder="Buscar...">
+        </div>
+        <div class="form-group">
+            <label for="domicilio-input">Buscar por Domicilio</label>
+            <input type="text" id="domicilio-input" class="form-control" placeholder="Buscar...">
+        </div>
+    </form>
+    <table class="table table-striped table-hover mt-4">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Provincia</th>
+                <th>Barrio/Localidad</th>
+                <th>Especialidad</th>
+                <th>Tipo de Cartilla</th>
+                <th>Domicilio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="results">
+            <!-- Los resultados filtrados se mostrarán aquí -->
+        </tbody>
+    </table>
+    <div class="paginator" id="paginator">
+        <!-- La paginación se mostrará aquí -->
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const provinciaInput = document.getElementById('provincia-input');
+    const localidadInput = document.getElementById('localidad-input');
+    const especialidadInput = document.getElementById('especialidad-input');
+    const domicilioInput = document.getElementById('domicilio-input');
+    const resultsDiv = document.getElementById('results');
+    const paginatorDiv = document.getElementById('paginator');
+    let timeout = null;
+
+    function fetchResults(query, provincia, localidad, especialidad, domicilio, page = 1) {
+        const url = new URL('/cartilla/buscar-cartillas/', window.location.origin);
+        url.searchParams.append('search', query);
+        url.searchParams.append('provincia', provincia);
+        url.searchParams.append('localidad', localidad);
+        url.searchParams.append('especialidad', especialidad);
+        url.searchParams.append('domicilio', domicilio);
+        url.searchParams.append('page', page);
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                data.results.forEach(cartilla => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${cartilla.nombre}</td>
+                        <td>${cartilla.provincia}</td>
+                        <td>${cartilla.barrio_localidad}</td>
+                        <td>${cartilla.especialidad}</td>
+                        <td>${cartilla.tipo_cartilla}</td>
+                        <td>${cartilla.domicilio}</td>
+                        <td><a href="/cartilla/detalle/${cartilla.id}" class="btn btn-primary">Ver</a></td>
+                    `;
+                    resultsDiv.appendChild(row);
+                });
+
+                paginatorDiv.innerHTML = '';
+                if (data.num_pages > 1) {
+                    const pagination = document.createElement('div');
+                    pagination.classList.add('pagination');
+
+                    if (data.has_previous) {
+                        const prevLink = document.createElement('a');
+                        prevLink.href = "#";
+                        prevLink.innerHTML = "&laquo; anterior";
+                        prevLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            fetchResults(query, provincia, localidad, especialidad, domicilio, data.previous_page_number);
+                        });
+                        pagination.appendChild(prevLink);
+                    }
+
+                    const firstPageLink = document.createElement('a');
+                    firstPageLink.href = "#";
+                    firstPageLink.innerHTML = "1";
+                    firstPageLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        fetchResults(query, provincia, localidad, especialidad, domicilio, 1);
+                    });
+                    pagination.appendChild(firstPageLink);
+
+                    if (data.page > 4) {
+                        const dots = document.createElement('span');
+                        dots.innerHTML = "...";
+                        pagination.appendChild(dots);
+                    }
+
+                    for (let i = Math.max(2, data.page - 2); i < Math.min(data.page + 3, data.num_pages); i++) {
+                        const pageLink = document.createElement('a');
+                        pageLink.href = "#";
+                        pageLink.innerHTML = i;
+                        if (i === data.page) {
+                            pageLink.classList.add('active');
+                        }
+                        pageLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            fetchResults(query, provincia, localidad, especialidad, domicilio, i);
+                        });
+                        pagination.appendChild(pageLink);
+                    }
+
+                    if (data.page < data.num_pages - 3) {
+                        const dots = document.createElement('span');
+                        dots.innerHTML = "...";
+                        pagination.appendChild(dots);
+                    }
+
+                    const lastPageLink = document.createElement('a');
+                    lastPageLink.href = "#";
+                    lastPageLink.innerHTML = data.num_pages;
+                    lastPageLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        fetchResults(query, provincia, localidad, especialidad, domicilio, data.num_pages);
+                    });
+                    pagination.appendChild(lastPageLink);
+
+                    if (data.has_next) {
+                        const nextLink = document.createElement('a');
+                        nextLink.href = "#";
+                        nextLink.innerHTML = "siguiente &raquo;";
+                        nextLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            fetchResults(query, provincia, localidad, especialidad, domicilio, data.next_page_number);
+                        });
+                        pagination.appendChild(nextLink);
+                    }
+
+                    paginatorDiv.appendChild(pagination);
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    function handleInput() {
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+            const query = searchInput.value;
+            const provincia = provinciaInput.value;
+            const localidad = localidadInput.value;
+            const especialidad = especialidadInput.value;
+            const domicilio = domicilioInput.value;
+            fetchResults(query, provincia, localidad, especialidad, domicilio);
+        }, 2000); // 2 segundos de retraso
+    }
+
+    searchInput.addEventListener('input', handleInput);
+    provinciaInput.addEventListener('input', handleInput);
+    localidadInput.addEventListener('input', handleInput);
+    especialidadInput.addEventListener('input', handleInput);
+    domicilioInput.addEventListener('input', handleInput);
+});
+</script>
+{% endblock %}

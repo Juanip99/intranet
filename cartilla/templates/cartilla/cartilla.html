@@ -1,0 +1,233 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Cartilla Médica{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Cartilla Médica</h1>
+    <form id="form_busqueda" method="get">
+        <div class="form-group">
+            <label for="id_provincia">Provincia</label>
+            <select id="id_provincia" name="provincia" class="form-control">
+                {% for provincia in form.fields.provincia.choices %}
+                    <option value="{{ provincia.0 }}" {% if provincia.0 == request.GET.provincia %}selected{% endif %}>{{ provincia.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_barrio_localidad">Barrio/Localidad</label>
+            <select id="id_barrio_localidad" name="barrio_localidad" class="form-control">
+                {% for barrio in form.fields.barrio_localidad.choices %}
+                    <option value="{{ barrio.0 }}" {% if barrio.0 == request.GET.barrio_localidad %}selected{% endif %}>{{ barrio.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_especialidad">Especialidad</label>
+            <select id="id_especialidad" name="especialidad" class="form-control">
+                {% for especialidad in form.fields.especialidad.choices %}
+                    <option value="{{ especialidad.0 }}" {% if especialidad.0 == request.GET.especialidad %}selected{% endif %}>{{ especialidad.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_tipo_cartilla">Tipo de Cartilla</label>
+            <select id="id_tipo_cartilla" name="tipo_cartilla" class="form-control">
+                {% for tipo in form.fields.tipo_cartilla.choices %}
+                    <option value="{{ tipo.0 }}" {% if tipo.0 == request.GET.tipo_cartilla %}selected{% endif %}>{{ tipo.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="page_size">Mostrar</label>
+            <select id="page_size" name="page_size" class="form-control">
+                <option value="25" {% if page_size == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if page_size == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if page_size == 100 %}selected{% endif %}>100</option>
+                <option value="300" {% if page_size == 300 %}selected{% endif %}>300</option>
+                <option value="500" {% if page_size == 500 %}selected{% endif %}>500</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <button type="button" id="print-cartilla" class="btn btn-secondary">Imprimir Cartilla</button>
+    </form>
+
+    <table class="table table-striped table-hover mt-4">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Provincia</th>
+                <th>Barrio/Localidad</th>
+                <th>Especialidad</th>
+                <th>Tipo de Cartilla</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cartilla-results">
+            {% for cartilla in cartillas %}
+                <tr>
+                    <td>{{ cartilla.nombre }}</td>
+                    <td>{{ cartilla.provincia }}</td>
+                    <td>{{ cartilla.barrio_localidad }}</td>
+                    <td>{{ cartilla.especialidad }}</td>
+                    <td>{{ cartilla.tipo_cartilla }}</td>
+                    <td>
+                        <a href="{% url 'detalles' cartilla.id %}" class="btn btn-success" target="_blank">Ver</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="paginator" id="paginator">
+        {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-links">
+                    {% if page_obj.has_previous %}
+                        <a href="#" data-page="{{ page_obj.previous_page_number }}">&laquo; anterior</a>
+                    {% endif %}
+                    <a href="#" data-page="1">1</a>
+                    {% if page_obj.number > 4 %}
+                        ...
+                    {% endif %}
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if i > page_obj.number and i < page_obj.number|add:4 %}
+                            <a href="#" data-page="{{ i }}">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:-3 %}
+                        ...
+                    {% endif %}
+                    <a href="#" data-page="{{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                    {% if page_obj.has_next %}
+                        <a href="#" data-page="{{ page_obj.next_page_number }}">siguiente &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
+    </div>
+
+    <p>{{ page_obj.paginator.count }} cartillas</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('form_busqueda');
+        const provinciaSelect = document.getElementById('id_provincia');
+        const barrioSelect = document.getElementById('id_barrio_localidad');
+        const especialidadSelect = document.getElementById('id_especialidad');
+        const tipoCartillaSelect = document.getElementById('id_tipo_cartilla');
+        const resultsContainer = document.getElementById('cartilla-results');
+        const paginatorContainer = document.getElementById('paginator');
+        const printButton = document.getElementById('print-cartilla');
+
+        function updateOptions(url, targetSelect, dataKey) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const selectedValue = targetSelect.value;
+                    targetSelect.innerHTML = '<option value="">Todas</option>';
+                    data[dataKey].forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        if (item === selectedValue) {
+                            option.selected = true;
+                        }
+                        targetSelect.appendChild(option);
+                    });
+                });
+        }
+
+        function updateAllOptions() {
+            const url = `{% url 'ajax_filtro_opciones' %}?provincia=${provinciaSelect.value}&barrio_localidad=${barrioSelect.value}&especialidad=${especialidadSelect.value}&tipo_cartilla=${tipoCartillaSelect.value}`;
+            updateOptions(url, provinciaSelect, 'provincias');
+            updateOptions(url, barrioSelect, 'barrios');
+            updateOptions(url, especialidadSelect, 'especialidades');
+            updateOptions(url, tipoCartillaSelect, 'tipos_cartilla');
+        }
+
+        function fetchResults(page = 1) {
+            const formData = new FormData(form);
+            formData.append('page', page);
+            const params = new URLSearchParams(formData);
+            fetch(`{% url 'filtro_cartilla' %}?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultsContainer.innerHTML = '';
+                    data.results.forEach(cartilla => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${cartilla.nombre}</td>
+                            <td>${cartilla.provincia}</td>
+                            <td>${cartilla.barrio_localidad}</td>
+                            <td>${cartilla.especialidad}</td>
+                            <td>${cartilla.tipo_cartilla}</td>
+                            <td><a href="/cartilla/detalle/${cartilla.id}" class="btn btn-success" target="_blank">Ver</a></td>
+                        `;
+                        resultsContainer.appendChild(row);
+                    });
+
+                    // Update pagination
+                    paginatorContainer.innerHTML = '';
+                    if (data.num_pages > 1) {
+                        let paginationHtml = '<div class="pagination"><span class="page-links">';
+                        if (data.has_previous) {
+                            paginationHtml += `<a href="#" data-page="${data.previous_page_number}">&laquo; anterior</a>`;
+                        }
+                        paginationHtml += `<a href="#" data-page="1">1</a>`;
+                        if (data.page > 4) {
+                            paginationHtml += '...';
+                        }
+                        let middlePages = [];
+                        for (let i = Math.max(2, data.page - 3); i <= Math.min(data.num_pages - 1, data.page + 3); i++) {
+                            middlePages.push(`<a href="#" data-page="${i}">${i}</a>`);
+                        }
+                        paginationHtml += middlePages.join(', ');
+                        if (data.page < data.num_pages - 3) {
+                            paginationHtml += '...';
+                        }
+                        paginationHtml += `<a href="#" data-page="${data.num_pages}">${data.num_pages}</a>`;
+                        if (data.has_next) {
+                            paginationHtml += `<a href="#" data-page="${data.next_page_number}">siguiente &raquo;</a>`;
+                        }
+                        paginationHtml += `</span><span class="current-page"> (Página ${data.page}/${data.num_pages})</span></div>`;
+                        paginatorContainer.innerHTML = paginationHtml;
+                    }
+
+                    // Add event listeners to new pagination links
+                    document.querySelectorAll('.pagination a').forEach(link => {
+                        link.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            const page = this.getAttribute('data-page');
+                            fetchResults(page);
+                        });
+                    });
+                });
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            fetchResults();
+        });
+
+        provinciaSelect.addEventListener('change', function() {
+            updateAllOptions();
+            fetchResults();
+        });
+        barrioSelect.addEventListener('change', fetchResults);
+        especialidadSelect.addEventListener('change', fetchResults);
+        tipoCartillaSelect.addEventListener('change', fetchResults);
+
+        // Initial fetch
+        fetchResults();
+
+        // Handle print button click
+        printButton.addEventListener('click', function() {
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            window.open(`/cartilla/generate_pdf?${params.toString()}`, '_blank');
+        });
+    });
+</script>
+{% endblock %}

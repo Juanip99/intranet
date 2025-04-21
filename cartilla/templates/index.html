@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}UTEPLIM Administración{% endblock %}
+
+{% block content %}
+
+<div id="content-main" class="container mt-5">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">UTEPLIM Administración</h1>
+    </div>
+    <div class="app-list">
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="{% url 'leer' %}" class="btn btn-primary btn-block">Cartilla</a>
+            </li>
+            <li class="list-group-item">
+                <a href="{% url 'cartilla_dinamica' %}" class="btn btn-secondary btn-block">Cartilla Dinámica</a>
+            </li>
+            <li class="list-group-item">
+                <a href="{% url 'enlaces_utiles' %}" class="btn btn-info btn-block">Enlaces Útiles</a>
+            </li>
+            <!-- Agrega más enlaces aquí para otras aplicaciones -->
+        </ul>
+    </div>
+</div>
+{% endblock %}

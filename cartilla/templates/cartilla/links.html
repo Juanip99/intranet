@@ -1,0 +1,65 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Enlaces Útiles{% endblock %}
+
+{% block content %}
+<div id="content-main" class="container mt-5">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Enlaces Útiles</h1>
+    </div>
+    <div class="app-list">
+        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Editor Uteplim' or request.user.groups.all.0.name == 'Uteplim BSAS' %}
+        <div class="app-list">
+            <div class="app-list">
+                <h2>CEDE BUENOS AIRES</h2>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h3>CREDENCIALES</h3>
+                        <a href="#" target="_blank" class="btn btn-primary btn-block">Form</a>
+                        <a href="#" target="_blank" class="btn btn-secondary btn-block">Carpeta PDFs</a>
+                    </li>
+                    <li class="list-group-item">
+                        <h3>AUTORIZACIONES FARMACIA</h3>
+                        <a href="#" target="_blank" class="btn btn-primary btn-block">Form</a>
+                        <a href="#" target="_blank" class="btn btn-secondary btn-block">Carpeta PDFs</a>
+                    </li>
+                    <li class="list-group-item">
+                        <h3>FORM ACTUALIZAR CARTILLA</h3>
+                        <a href="#" target="_blank" class="btn btn-primary btn-block">Form</a>
+                    </li>
+                    <li class="list-group-item">
+                        <h3>AUTORIZACIONES</h3>
+                        <a href="#" target="_blank" class="btn btn-primary btn-block">Form</a>
+                        <a href="#" target="_blank" class="btn btn-secondary btn-block">Carpeta</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Editor Uteplim' or request.user.groups.all.0.name == 'Uteplim SF' %}
+        <div class="app-list">
+            <div class="app-list">
+                <h2> CEDE SANTA FE </h2>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h3>AUTORIZACIONES</h3>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSebtHG6OMF6_vFdMMISJicfb86TYwI0hd_RkJypZ9qlhUy5OA/viewform?usp=pp_url" target="_blank" class="btn btn-primary btn-block">Form</a>
+                        <a href="https://drive.google.com/drive/folders/16jo3cVl810ncVbSqPz5yU87KeB1H5cmG?usp=sharing" target="_blank" class="btn btn-secondary btn-block">Carpeta</a>
+                    </li>
+                    <li class="list-group-item">
+                        <h3>FARMACIAS</h3>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLScweYV1OBV2iL1QjTKuIr_MEzaV1bgIoUic6mCh0AJCSY760A/viewform?usp=pp_url" target="_blank" class="btn btn-primary btn-block">Form</a>
+                        <a href="https://drive.google.com/drive/folders/14oKyNp2p1qq_eHhyWi4F9KPqbszEDID_?usp=sharing" target="_blank" class="btn btn-secondary btn-block">Carpeta</a>
+                    </li>
+                    <li class="list-group-item">
+                        <h3>CENTRAL 0800</h3>
+                        <a href="https://docs.google.com/spreadsheets/d/1hp8Aru3cu5j0-r0yXht5_h-y8xaFXX5DU6E35jP2lcY/edit?usp=sharing" target="_blank" class="btn btn-primary btn-block">Spreadsheet</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        
+    </div>
+</div>
+{% endblock %}
