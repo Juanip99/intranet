@@ -3,7 +3,7 @@ from django.urls import path, include
 from cartilla.views import index
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('intranet/', admin.site.urls),
     path('', index, name='index'),
     path('cartilla/', include('cartilla.urls')),
 ]

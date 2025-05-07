@@ -12,7 +12,7 @@ SECRET_KEY = 'your-secret-key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['juanpailles.pythonanywhere.com']
 
 # Application definition
 
@@ -71,14 +71,11 @@ WSGI_APPLICATION = 'intranet.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dbig0yddnxfk24',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'NAME': 'juanpailles$default',
+        'USER': 'juanpailles',
+        'PASSWORD': 'qaz42175002',
+        'HOST': 'juanpailles.mysql.pythonanywhere-services.com',
         'PORT': '3306',
-        'OPTIONS': {
-            'sql_mode': 'traditional',
-        }
     }
 }
 
@@ -103,12 +100,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-ar'
 
 TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -116,7 +113,9 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-MEDIA_URL = '/uploads/'
+MEDIA_ROOT = BASE_DIR / 'MEDIA'
+MEDIA_URL = '/public/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/uploads')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
@@ -137,6 +136,9 @@ JAZZMIN_SETTINGS = {
     "copyright": "Uteplim",
     "topmenu_links": [
         {"name": "Panel de Control", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Cartilla", "url": "/cartilla/", "new_window": False},
+        {"name": "Cartilla Dinámica", "url": "/cartilla/cartilla-dinamica/", "new_window": False},
+        {"name": "Enlaces Útiles", "url": "/cartilla/enlaces-utiles/", "new_window": False},
     ],
     "show_sidebar": True,
     "navigation_expanded": False,

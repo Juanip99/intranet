@@ -11,7 +11,7 @@
         {% if request.user.is_superuser or request.user.groups.all.0.name == 'Editor Uteplim' or request.user.groups.all.0.name == 'Uteplim BSAS' %}
         <div class="app-list">
             <div class="app-list">
-                <h2>CEDE BUENOS AIRES</h2>
+                <h2>SEDE BUENOS AIRES</h2>
                 <ul class="list-group">
                     <li class="list-group-item">
                         <h3>CREDENCIALES</h3>
@@ -39,7 +39,7 @@
         {% if request.user.is_superuser or request.user.groups.all.0.name == 'Editor Uteplim' or request.user.groups.all.0.name == 'Uteplim SF' %}
         <div class="app-list">
             <div class="app-list">
-                <h2> CEDE SANTA FE </h2>
+                <h2> SEDE SANTA FE </h2>
                 <ul class="list-group">
                     <li class="list-group-item">
                         <h3>AUTORIZACIONES</h3>
@@ -59,7 +59,7 @@
             </div>
         </div>
         {% endif %}
-        
+
     </div>
 </div>
 {% endblock %}
