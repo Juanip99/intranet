@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
 from django.views.generic import ListView, DetailView
-from .models import Cartilla
+from .models import Cartilla , CartillaChangeRequest
 from .forms import CartillaFilterForm, CartillaAgregarForm
 from .decorators import staff_required
 from io import BytesIO
@@ -428,3 +428,8 @@ def buscar_especialidades_centros(request):
 def ver_cartilla(request, pk):
     cartilla = get_object_or_404(Cartilla, pk=pk)
     return render(request, 'cartilla/detalles.html', {'object': cartilla})
+
+def historial_cartilla(request, cartilla_id):
+    cartilla = get_object_or_404(Cartilla, id=cartilla_id)
+    cambios = CartillaChangeRequest.objects.filter(cartilla=cartilla).order_by('-requested_at')
+    return render(request, 'admin/cartilla/historial_cartilla.html', {'cartilla': cartilla, 'cambios': cambios})

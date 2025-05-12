@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, autocomplete
-from .views import CartillaListado, CartillaDetalle, filtro_cartilla, filtro_opciones, ver_cartilla, cartilla_dinamica, buscar_cartillas, generate_pdf, enlaces_utiles
+from .views import CartillaListado, CartillaDetalle, filtro_cartilla, filtro_opciones, ver_cartilla, cartilla_dinamica, buscar_cartillas, generate_pdf, enlaces_utiles, historial_cartilla
 
 urlpatterns = [
     path('', CartillaListado.as_view(), name='leer'),
@@ -15,4 +15,6 @@ urlpatterns = [
     path('barrio-localidad-autocomplete/', autocomplete.BarrioLocalidadAutocomplete.as_view(), name='barrio-localidad-autocomplete'),
     path('especialidad-autocomplete/', autocomplete.EspecialidadAutocomplete.as_view(), name='especialidad-autocomplete'),
     path('enlaces-utiles/', enlaces_utiles, name='enlaces_utiles'),
+    path('historial/<int:cartilla_id>/', historial_cartilla, name='cartilla_history'),
+
 ]

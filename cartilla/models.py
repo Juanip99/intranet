@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from simple_history.models import HistoricalRecords
+from django.contrib.auth.models import User
+from django.contrib import admin
 
 class Cartilla(models.Model):
     id = models.AutoField(primary_key=True)
@@ -22,13 +23,54 @@ class Cartilla(models.Model):
     usuario_alta = models.IntegerField(null=True, blank=True)
     fecha_baja = models.CharField(max_length=15, null=True, blank=True)
     especialidades_originales = models.CharField(max_length=255, null=True, blank=True)
-    history = HistoricalRecords()
 
     class Meta:
         db_table = 'cartilla_online'  # Nombre de la tabla en la base de datos
 
-class HistoricalCartillaProxy(Cartilla.history.model):
+    def __str__(self):
+        return self.nombre
+
+class CartillaChangeRequest(models.Model):
+    ACTION_CHOICES = [
+        ('create', 'Alta'),
+        ('update', 'Edición'),
+        ('delete', 'Baja'),
+        ('add_specialties', 'Agregar Especialidades'),
+    ]
+
+    cartilla = models.ForeignKey(
+        'Cartilla',
+        on_delete=models.CASCADE,
+        related_name='change_requests',
+        null=True,
+        blank=True
+    )
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES, null=True, blank=True)
+    field_name = models.CharField(max_length=255, null=True, blank=True)
+    old_value = models.TextField(null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
+    requested_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_changes'
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
-        proxy = True
-        verbose_name = "Historial de Cambio"
-        verbose_name_plural = "Historial de Cambios"
+        db_table = 'cartilla_change_request'
+
+    def __str__(self):
+        if self.cartilla:
+            return f"{self.get_action_display()} - {self.cartilla.nombre}"
+        return f"{self.get_action_display()} - Nueva Cartilla"
+    

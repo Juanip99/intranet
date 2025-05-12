@@ -1,6 +1,7 @@
 from django import forms
-from .models import Cartilla
+from .models import Cartilla, CartillaChangeRequest
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Formularios de administración de Django
 class CartillaCreateForm(forms.ModelForm):
@@ -28,36 +29,30 @@ class CartillaCreateForm(forms.ModelForm):
         self.fields['provincia'].choices = sorted([(provincia, provincia) for provincia in Cartilla.objects.values_list('provincia', flat=True).distinct()])
 
     def save(self, commit=True):
-        instance = super(CartillaCreateForm, self).save(commit=False)
-        instance.fecha_alta = timezone.now().strftime('%d-%m-%Y')
-        instance.habilitado = 1
-        instance.solo_derivacion = 0
-        instance.usuario_alta = 0
-        especialidades = self.cleaned_data['especialidad']
-        created_instances = []
-        for especialidad in especialidades:
-            created_instance = Cartilla.objects.create(
-                procedencia_convenio=instance.procedencia_convenio,
-                tipo_cartilla=instance.tipo_cartilla,
-                matricula=instance.matricula,
-                especialidad=especialidad,
-                nombre=instance.nombre,
-                domicilio=instance.domicilio,
-                telefono=instance.telefono,
-                barrio_localidad=instance.barrio_localidad,
-                provincia=instance.provincia,
-                centro_de_atencion=instance.centro_de_atencion,
-                cuit=instance.cuit,
-                habilitado=instance.habilitado,
-                email=instance.email,
-                solo_derivacion=instance.solo_derivacion,
-                fecha_alta=instance.fecha_alta,
-                usuario_alta=instance.usuario_alta,
-                especialidades_originales=instance.especialidades_originales
-            )
-            created_instances.append(created_instance)
-        return created_instances[0] if created_instances else instance  # Devolver la primera instancia creada o la instancia principal
-
+        # Guardar la instancia actual antes de actualizarla
+        instance = super(CartillaEditForm, self).save(commit=False)
+    
+        # Crear una solicitud de cambio en lugar de guardar directamente
+        for field in self.changed_data:
+            # Forzar una consulta directa a la base de datos para obtener el valor antiguo
+            old_value_query = Cartilla.objects.filter(pk=self.instance.pk).values(field).first()
+            old_value = old_value_query[field] if old_value_query and field in old_value_query else ''  # Manejar valores nulos o inexistentes
+    
+            # Obtener el nuevo valor del formulario
+            new_value = self.cleaned_data[field]
+    
+            # Obtener la instancia del usuario a partir de usuario_alta
+            user_instance = User.objects.filter(id=self.instance.usuario_alta).first()
+            if user_instance:  # Verificar que el usuario exista
+                CartillaChangeRequest.objects.create(
+                    cartilla=self.instance,
+                    action='update',
+                    field_name=field,
+                    old_value=old_value,  # Guardar el valor antiguo correctamente
+                    new_value=new_value,  # Guardar el nuevo valor correctamente
+                    requested_by=user_instance  # Asignar la instancia del usuario
+                )
+        return instance  # No guardar directamente
 class CartillaEditForm(forms.ModelForm):
     class Meta:
         model = Cartilla
@@ -80,15 +75,31 @@ class CartillaEditForm(forms.ModelForm):
         self.fields['especialidad'].choices += sorted([(especialidad, especialidad) for especialidad in Cartilla.objects.values_list('especialidad', flat=True).distinct()])
         self.fields['barrio_localidad'].choices += sorted([(barrio_localidad, barrio_localidad) for barrio_localidad in Cartilla.objects.values_list('barrio_localidad', flat=True).distinct()])
         self.fields['provincia'].choices += sorted([(provincia, provincia) for provincia in Cartilla.objects.values_list('provincia', flat=True).distinct()])
-
-    def clean_habilitado(self):
-        return 1 if self.cleaned_data['habilitado'] else 0
-
-    def clean(self):
-        cleaned_data = super().clean()
-        # Aquí puedes agregar validaciones adicionales si es necesario
-        return cleaned_data
+    def save(self, commit=True):
+        # Guardar la instancia actual antes de actualizarla
+        instance = super(CartillaEditForm, self).save(commit=False)
     
+        # Crear una solicitud de cambio en lugar de guardar directamente
+        for field in self.changed_data:
+            # Obtener el valor antiguo directamente desde la base de datos
+            old_value_query = Cartilla.objects.filter(pk=self.instance.pk).values_list(field, flat=True).first()
+            old_value = old_value_query if old_value_query is not None else ''  # Manejar valores nulos
+    
+            # Obtener el nuevo valor del formulario
+            new_value = self.cleaned_data[field]
+    
+            # Obtener la instancia del usuario a partir de usuario_alta
+            user_instance = User.objects.filter(id=self.instance.usuario_alta).first()
+            if user_instance:  # Verificar que el usuario exista
+                CartillaChangeRequest.objects.create(
+                    cartilla=self.instance,
+                    action='update',
+                    field_name=field,
+                    old_value=old_value,  # Guardar el valor antiguo correctamente
+                    new_value=new_value,  # Guardar el nuevo valor correctamente
+                    requested_by=user_instance  # Asignar la instancia del usuario
+                )
+        return instance  # No guardar directamente
 class CartillaAgregarForm(forms.ModelForm):
     especialidad = forms.MultipleChoiceField(choices=[], widget=forms.SelectMultiple(attrs={'class': 'specialty-select'}))
 
