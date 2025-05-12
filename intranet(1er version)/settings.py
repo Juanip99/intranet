@@ -12,7 +12,8 @@ SECRET_KEY = 'your-secret-key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#production
+ALLOWED_HOSTS = ['juanpailles.pythonanywhere.com']
 
 # Application definition
 
@@ -68,18 +69,31 @@ WSGI_APPLICATION = 'intranet.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#local
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'dbig0yddnxfk24',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#                 'charset': 'utf8mb4',
+#                 'sql_mode': 'traditional',
+#         },
+#     }
+# }
+
+#production
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dbig0yddnxfk24',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'NAME': 'juanpailles$default',
+        'USER': 'juanpailles',
+        'PASSWORD': 'qaz42175002',
+        'HOST': 'juanpailles.mysql.pythonanywhere-services.com',
         'PORT': '3306',
-        'OPTIONS': {
-                'charset': 'utf8mb4',
-                'sql_mode': 'traditional',
-        },
     }
 }
 
@@ -117,7 +131,9 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-MEDIA_URL = '/uploads/'
+MEDIA_ROOT = BASE_DIR / 'MEDIA'
+MEDIA_URL = '/public/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/uploads')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
