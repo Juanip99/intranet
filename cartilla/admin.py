@@ -40,6 +40,14 @@ class AgruparEspecialidadesFilter(admin.SimpleListFilter):
             queryset = queryset.annotate(
                 especialidades_agrupadas=Subquery(subquery)
             )
+            combinaciones_vistas = set()
+            ids_unicos = []
+            for obj in queryset:
+                key = (obj.nombre)
+                if key not in combinaciones_vistas:
+                    combinaciones_vistas.add(key)
+                    ids_unicos.append(obj.id)
+            return queryset.filter(id__in=ids_unicos)
         return queryset
 
 class CartillaAdmin(admin.ModelAdmin):
@@ -107,11 +115,10 @@ class CartillaAdmin(admin.ModelAdmin):
         else:
             super().save_model(request, obj, form, change)
     def get_list_display(self, request):
-        # Mostrar la columna "agregar_especialidades" solo si están agrupadas
         if request.GET.get('agrupar_especialidades') == 'yes':
             return (
                 'nombre_link', 
-                'get_especialidad', 
+                'get_especialidades_agrupadas', 
                 'tipo_cartilla', 
                 'barrio_localidad', 
                 'ver_mas', 

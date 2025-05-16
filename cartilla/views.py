@@ -19,6 +19,7 @@ from reportlab.lib.utils import ImageReader
 import os
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.db import IntegrityError
 
 # Vistas del sitio
 @login_required
@@ -325,30 +326,47 @@ def history_view(request):
         'opts': Cartilla._meta,
     }
     return render(request, 'admin/cartilla/history_view.html', context)
+
 def agregar_especialidades(request, cartilla_id):
     cartilla = get_object_or_404(Cartilla, id=cartilla_id)
+    error_message = None
+    especialidad_duplicada = None
+
     if request.method == 'POST':
         form = CartillaAgregarForm(request.POST)
         if form.is_valid():
             especialidades = form.cleaned_data['especialidad']
             for especialidad in especialidades:
-                Cartilla.objects.create(
-                    procedencia_convenio=cartilla.procedencia_convenio,
-                    tipo_cartilla=cartilla.tipo_cartilla,
-                    matricula=cartilla.matricula,
-                    especialidad=especialidad,
-                    nombre=cartilla.nombre,
-                    domicilio=cartilla.domicilio,
-                    telefono=cartilla.telefono,
-                    barrio_localidad=cartilla.barrio_localidad,
-                    provincia=cartilla.provincia,
-                    centro_de_atencion=cartilla.centro_de_atencion,
-                    cuit=cartilla.cuit,
-                    habilitado=cartilla.habilitado,
-                    email=cartilla.email,
-                    solo_derivacion=cartilla.solo_derivacion,
-                    especialidades_originales=cartilla.especialidades_originales
-                )
+                try:
+                    Cartilla.objects.create(
+                        procedencia_convenio=cartilla.procedencia_convenio,
+                        tipo_cartilla=cartilla.tipo_cartilla,
+                        matricula=cartilla.matricula,
+                        especialidad=especialidad,
+                        nombre=cartilla.nombre,
+                        domicilio=cartilla.domicilio,
+                        telefono=cartilla.telefono,
+                        barrio_localidad=cartilla.barrio_localidad,
+                        provincia=cartilla.provincia,
+                        centro_de_atencion=cartilla.centro_de_atencion,
+                        cuit=cartilla.cuit,
+                        habilitado=cartilla.habilitado,
+                        email=cartilla.email,
+                        solo_derivacion=cartilla.solo_derivacion,
+                        especialidades_originales=cartilla.especialidades_originales
+                    )
+                except IntegrityError:
+                    error_message = f"La especialidad '{especialidad}' ya está registrada para este centro."
+                    especialidad_duplicada = especialidad
+                    break
+            if error_message:
+                # Vuelve a mostrar el formulario con el mensaje de error
+                return render(request, 'admin/cartilla/agregar_especialidades.html', {
+                    'form': form,
+                    'cartilla': cartilla,
+                    'error_message': error_message,
+                    'especialidad_duplicada': especialidad_duplicada
+                })
             return redirect(reverse('admin:cartilla_cartilla_changelist'))
     else:
         initial_data = {
@@ -368,7 +386,12 @@ def agregar_especialidades(request, cartilla_id):
             'especialidades_originales': cartilla.especialidades_originales
         }
         form = CartillaAgregarForm(initial=initial_data)
-    return render(request, 'admin/cartilla/agregar_especialidades.html', {'form': form, 'cartilla': cartilla})
+    return render(request, 'admin/cartilla/agregar_especialidades.html', {
+        'form': form,
+        'cartilla': cartilla,
+        'error_message': error_message,
+        'especialidad_duplicada': especialidad_duplicada
+    })
 # Vistas de administración de Django
 @login_required
 @staff_required
